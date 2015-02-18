@@ -39,7 +39,7 @@
 }
 
 + (LinkedInHttpClient *)clientForApplication:(LinkedInApplication *)application presentingViewController:viewController {
-  LinkedInHttpClient *client = [[self alloc] initWithBaseURL:[NSURL URLWithString:@"https://www.linkedin.com"]];
+  LinkedInHttpClient *client = [[[self class] alloc] initWithBaseURL:[NSURL URLWithString:@"https://www.linkedin.com"]];
   client.application = application;
   client.presentingViewController = viewController;
   return client;
