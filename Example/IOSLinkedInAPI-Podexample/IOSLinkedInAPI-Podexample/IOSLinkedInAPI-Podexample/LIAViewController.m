@@ -9,7 +9,7 @@
 #import "LIAViewController.h"
 #import "AFHTTPRequestOperation.h"
 #import "LIALinkedInHttpClient.h"
-#import "LIALinkedInClientExampleCredentials.h"
+
 #import "LIALinkedInApplication.h"
 
 @interface LIAViewController ()
@@ -51,11 +51,11 @@
 }
 
 - (LIALinkedInHttpClient *)client {
-  LIALinkedInApplication *application = [LIALinkedInApplication applicationWithRedirectURL:@"http://www.ancientprogramming.com/liaexample"
-                                                                                  clientId:LINKEDIN_CLIENT_ID
-                                                                              clientSecret:LINKEDIN_CLIENT_SECRET
+  LIALinkedInApplication *application = [LIALinkedInApplication applicationWithRedirectURL:@"https://www.baseva.com/legal"
+                                                                                  clientId:@"78oaahe1pj9x9m"
+                                                                              clientSecret:@"eqSA8YkKdnOFUR1I"
                                                                                      state:@"DCEEFWF45453sdffef424"
-                                                                             grantedAccess:@[@"r_fullprofile", @"r_network"]];
+                                                                             grantedAccess:@[@"r_fullprofile", @"r_network", @"w_messages",@"r_emailaddress",@"r_contactinfo"]];
   return [LIALinkedInHttpClient clientForApplication:application presentingViewController:nil];
 }
 
