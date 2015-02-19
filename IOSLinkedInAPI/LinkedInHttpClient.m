@@ -59,12 +59,24 @@
 - (BOOL)validToken {
   NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 
-  if ([[NSDate date] timeIntervalSince1970] >= ([userDefaults doubleForKey:LINKEDIN_CREATION_KEY] + [userDefaults doubleForKey:LINKEDIN_EXPIRATION_KEY])) {
+  if ([[NSDate date] timeIntervalSince1970] - (24 * 3600) >= ([userDefaults doubleForKey:LINKEDIN_CREATION_KEY] + [userDefaults doubleForKey:LINKEDIN_EXPIRATION_KEY])) {
     return NO;
   }
   else {
     return YES;
   }
+}
+
+- (void)invalidateToken {
+    
+    // remove credentials
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    
+    [userDefaults removeObjectForKey:LINKEDIN_TOKEN_KEY];
+    [userDefaults removeObjectForKey:LINKEDIN_EXPIRATION_KEY];
+    [userDefaults removeObjectForKey:LINKEDIN_CREATION_KEY];
+    [userDefaults synchronize];
+    
 }
 
 - (NSString *)accessToken {
@@ -76,6 +88,7 @@
   NSString *url = [NSString stringWithFormat:accessTokenUrl, authorizationCode, [self.application.redirectURL LIAEncode], self.application.clientId, self.application.clientSecret];
 
   [self POST:url parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+      
     NSString *accessToken = [responseObject objectForKey:@"access_token"];
     NSTimeInterval expiration = [[responseObject objectForKey:@"expires_in"] doubleValue];
 

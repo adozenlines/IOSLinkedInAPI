@@ -31,6 +31,7 @@
 + (LinkedInHttpClient *)clientForApplication:(LinkedInApplication *)application presentingViewController:viewController;
 
 - (BOOL)validToken;
+- (void)invalidateToken;
 
 - (NSString *)accessToken;
 
