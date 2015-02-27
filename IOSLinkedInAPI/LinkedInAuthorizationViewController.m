@@ -28,6 +28,12 @@ NSString *kLinkedInErrorDomain = @"LIALinkedInERROR";
 NSString *kLinkedInDeniedByUser = @"the+user+denied+your+request";
 
 @interface LinkedInAuthorizationViewController ()
+{
+    NSURL *_linkedInURL;
+    BOOL _Authenticated;
+    NSURLRequest *_FailedRequest;
+    NSURLConnection *_connectionBox;
+}
 @property(nonatomic, strong) UIWebView *authenticationWebView;
 @property(nonatomic, copy) LIAAuthorizationCodeFailureCallback failureCallback;
 @property(nonatomic, copy) LIAAuthorizationCodeSuccessCallback successCallback;
@@ -74,7 +80,11 @@ BOOL handlingRedirectURL;
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     NSString *linkedIn = [NSString stringWithFormat:@"https://www.linkedin.com/uas/oauth2/authorization?response_type=code&client_id=%@&scope=%@&state=%@&redirect_uri=%@", self.application.clientId, self.application.grantedAccessString, self.application.state, [self.application.redirectURL LIAEncode]];
-    [self.authenticationWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:linkedIn]]];
+    
+    _linkedInURL = [NSURL URLWithString:linkedIn];
+    
+    [self.authenticationWebView loadRequest:[NSURLRequest requestWithURL:_linkedInURL]];
+    
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
 }
 
@@ -94,11 +104,24 @@ BOOL handlingRedirectURL;
 
 @implementation LinkedInAuthorizationViewController (UIWebViewDelegate)
 
+- (BOOL)verifyServerTrust:(NSURLRequest *)request {
+    BOOL result = _Authenticated;
+    if (!_Authenticated) {
+        _FailedRequest = request;
+        _connectionBox = [[NSURLConnection alloc] initWithRequest:request delegate:self];
+    }
+    return result;
+}
+
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
-    NSString *url = [[request URL] absoluteString];
 
     //prevent loading URL if it is the redirectURL
+    NSString *url = [[request URL] absoluteString];
     handlingRedirectURL = [url hasPrefix:self.application.redirectURL];
+
+    if (!_Authenticated && !handlingRedirectURL) {
+        return [self verifyServerTrust:request];
+    }
 
     if (handlingRedirectURL) {
         if ([url rangeOfString:@"error"].location != NSNotFound) {
@@ -144,6 +167,8 @@ BOOL handlingRedirectURL;
 
     if (!handlingRedirectURL)
         self.failureCallback(error);
+    
+    _Authenticated = NO;
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
@@ -165,6 +190,33 @@ BOOL handlingRedirectURL;
 		
 		[webView stringByEvaluatingJavaScriptFromString: js];
 	}
+    
+    _Authenticated = NO;
+}
+
+-(void)connection:(NSURLConnection *)connection willSendRequestForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
+    
+    if ([challenge.protectionSpace.authenticationMethod isEqualToString:NSURLAuthenticationMethodServerTrust]) {
+
+        if ([challenge.protectionSpace.host isEqualToString:_linkedInURL.host]) {
+#ifdef DEBUG
+            NSLog(@"trusting connection to host %@", challenge.protectionSpace.host);
+#endif
+            [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
+        } else {
+#ifdef DEBUG
+            NSLog(@"Not trusting connection to host %@", challenge.protectionSpace.host);
+#endif
+        }
+    }
+    [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
+}
+
+-(void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)pResponse {
+    _Authenticated = YES;
+    [connection cancel];
+    [self.authenticationWebView loadRequest:_FailedRequest];
+    _connectionBox = nil;
 }
 
 @end
