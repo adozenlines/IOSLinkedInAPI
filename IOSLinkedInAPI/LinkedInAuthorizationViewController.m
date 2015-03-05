@@ -207,9 +207,14 @@ BOOL handlingRedirectURL;
 #ifdef DEBUG
             NSLog(@"Not trusting connection to host %@", challenge.protectionSpace.host);
 #endif
+            [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
         }
+    } else {
+        
+       [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
+        
     }
-    [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
+    
 }
 
 -(void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)pResponse {
