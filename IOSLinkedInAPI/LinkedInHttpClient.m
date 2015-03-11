@@ -52,6 +52,7 @@
   self = [super initWithBaseURL:url];
   if (self) {
     [self setResponseSerializer:[AFJSONResponseSerializer serializer]];
+      
   }
   return self;
 }
@@ -83,7 +84,7 @@
   return [[NSUserDefaults standardUserDefaults] objectForKey:LINKEDIN_TOKEN_KEY];
 }
 
-- (void)getAccessToken:(NSString *)authorizationCode success:(void (^)(NSDictionary *))success failure:(void (^)(NSError *))failure {
+- (void)getAccessToken:(NSString *)authorizationCode success:(void (^)(NSDictionary *, AFHTTPRequestOperation *operation))success failure:(void (^)(NSError *, AFHTTPRequestOperation *operation))failure {
   NSString *accessTokenUrl = @"/uas/oauth2/accessToken?grant_type=authorization_code&code=%@&redirect_uri=%@&client_id=%@&client_secret=%@";
   NSString *url = [NSString stringWithFormat:accessTokenUrl, authorizationCode, [self.application.redirectURL LIAEncode], self.application.clientId, self.application.clientSecret];
 
@@ -100,9 +101,9 @@
     [userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:LINKEDIN_CREATION_KEY];
     [userDefaults synchronize];
 
-    success(responseObject);
+    success(responseObject, operation);
   }  failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-    failure(error);
+    failure(error, operation);
   }];
 
 }

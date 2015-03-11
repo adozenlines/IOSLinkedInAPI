@@ -35,7 +35,7 @@
 
 - (NSString *)accessToken;
 
-- (void)getAccessToken:(NSString *)authorizationCode success:(void (^)(NSDictionary *))success failure:(void (^)(NSError *))failure;
+- (void)getAccessToken:(NSString *)authorizationCode success:(void (^)(NSDictionary *, AFHTTPRequestOperation *operation))success failure:(void (^)(NSError *, AFHTTPRequestOperation *operation))failure;
 
 - (void)getAuthorizationCode:(void (^)(NSString *))success cancel:(void (^)(void))cancel failure:(void (^)(NSError *))failure;
 @end
