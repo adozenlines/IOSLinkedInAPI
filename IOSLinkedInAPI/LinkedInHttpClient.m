@@ -23,7 +23,9 @@
 #import "LinkedInAuthorizationViewController.h"
 #import "NSString+LIAEncode.h"
 
-#import <AFNetworking/AFNetworking.h>
+#import "AFHTTPRequestOperation.h"
+#import "AFHTTPRequestSerializer+OAuth2.h"
+#import "AFOAuth2Manager.h"
 
 #define LINKEDIN_TOKEN_KEY          @"linkedin_token"
 #define LINKEDIN_EXPIRATION_KEY     @"linkedin_expiration"
