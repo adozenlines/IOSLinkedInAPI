@@ -21,7 +21,6 @@
 // THE SOFTWARE.
 
 #import <AFNetworking/AFNetworking.h>
-@import AFNetworking;
 
 @class LinkedInApplication;
 
